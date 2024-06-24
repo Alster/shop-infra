@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - .env
+      - ../shop-app/.env
     environment:
       - PORT=3022
     ports:
