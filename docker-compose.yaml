@@ -57,7 +57,7 @@ services:
     hostname: unicorn-redis
     image: redis:5.0-alpine
     ports:
-      - "3021:6379"
+      - "3023:6379"
     restart: always
     networks:
       - jumpserver
@@ -70,12 +70,12 @@ services:
     environment:
       - MONGODB_DATABASE="unicorn"
     ports:
-      - "3022:3022"
+      - "3024:3024"
     volumes:
       - ./docker/volume/mongodb_local:/data/db
-    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "3022" ]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "3024" ]
     healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'unicorn-mongodb:3022'}]}) }" | mongosh --port 3022 --quiet
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'unicorn-mongodb:3024'}]}) }" | mongosh --port 3024 --quiet
       interval: 5s
       timeout: 30s
       retries: 30
