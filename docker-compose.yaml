@@ -1,0 +1,84 @@
+version: "3"
+
+services:
+  shop-app-api:
+    hostname: unicorn-shop-app-api
+    image: unicorn-shop-app-api
+    build:
+      context: ../shop-app-api
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=3021
+    ports:
+      - "3021:3021"
+    networks:
+      - jumpserver
+      - default
+    depends_on:
+      - redis-store
+      - mongodb-single-replica
+
+  shop-app:
+    hostname: unicorn-shop-app
+    image: unicorn-shop-app
+    build:
+      context: ../shop-app
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - PORT=3022
+    ports:
+      - "3022:3022"
+    networks:
+      - jumpserver
+      - default
+    depends_on:
+      - shop-app-api
+
+  shop-exchange-updater:
+    hostname: unicorn-shop-exchange-updater
+    image: unicorn-shop-exchange-updater
+    build:
+      context: ../shop-exchange-updater
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - jumpserver
+      - default
+    depends_on:
+      - redis-store
+
+  redis-store:
+    hostname: unicorn-redis
+    image: redis:5.0-alpine
+    ports:
+      - "3021:6379"
+    restart: always
+    networks:
+      - jumpserver
+      - default
+
+  mongodb-single-replica:
+    image: mongo:5.0.4
+    hostname: unicorn-mongodb
+    restart: always
+    environment:
+      - MONGODB_DATABASE="unicorn"
+    ports:
+      - "3022:3022"
+    volumes:
+      - ./docker/volume/mongodb_local:/data/db
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "3022" ]
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'unicorn-mongodb:3022'}]}) }" | mongosh --port 3022 --quiet
+      interval: 5s
+      timeout: 30s
+      retries: 30
+    networks:
+      - jumpserver
+      - default
