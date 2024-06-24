@@ -9,9 +9,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - .env
+      - ../shop-app-api/.env
     environment:
-      - APP_PORT=3021
+      - NODE_ENV=production
     ports:
       - "3021:3021"
     networks:
