@@ -82,3 +82,7 @@ services:
     networks:
       - jumpserver
       - default
+
+networks:
+  jumpserver:
+    external: true
